@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Cartograms with d3 &amp; TopoJSON</title>
+    <meta charset="utf-8">
+    <meta property="og:image" content="placeholder.png">
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="lib/colorbrewer.js"></script>
+    <script src="lib/topojson.js"></script>
+    <script src="cartogram.js"></script>
+    <style type="text/css">
+
+      body {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; 
+        font-size: 14px;
+        line-height: 1.4em;
+        padding: 0;
+        margin: 0;
+      }
+
+      #container {
+        width: 800px;
+        margin: 20px auto;
+      }
+
+      h1 {
+        font-size: 200%;
+        margin: 0 0 15px 0;
+      }
+
+      h2 {
+        font-size: 160%;
+        margin: 0 0 10px 0;
+      }
+
+      p {
+        margin: 0 0 10px;
+      }
+
+      form, form > * {
+        margin: 0;
+      }
+
+      #status {
+        color: #999;
+      }
+
+      #map-container {
+        height: 500px;
+        text-align: center;
+        position: relative;
+        margin: 20px 0;
+      }
+
+      #map {
+        display: block;
+        position: absolute;
+        background: #fff;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+      }
+
+      path.state {
+        stroke: #666;
+        stroke-width: .5;
+      }
+
+      path.state:hover {
+        stroke: #000;
+      }
+
+      form {
+        font-size: 120%;
+      }
+
+      select {
+        font-size: inherit;
+      }
+
+      #placeholder {
+        position: absolute;
+        z-index: -1;
+        display: block;
+        left: 0;
+        top: 0;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <h1>Cartograms with d3 &amp; TopoJSON</h1>
+      <div id="map-container">
+        <svg id="map"></svg>
+      </div>
+      <div id="about">
+        <h2>About</h2>
+        <p><a href="cartogram.js">cartogram.js</a> is a JavaScript implementation of
+        <a href="http://lambert.nico.free.fr/tp/biblio/Dougeniketal1985.pdf">an algoritm to construct continuous area cartograms</a>,
+        by James A. Dougenik, Nicholas R. Chrisman and Duane R. Niemeyer,
+        &copy;1985 by the Association of American Geographers. This example combines
+        <a href="http://github.com/mbostock/topojson">TopoJSON</a>-encoded 
+        boundaries of the United States from
+        <a href="http://www.naturalearthdata.com/downloads/110m-cultural-vectors/">Natural Earth</a>
+        with
+        <a href="http://www.census.gov/popest/data/state/totals/2011/">2011 US Census population estimates</a>
+        to size each state proportionally.</p>
+        
+        <p>There&rsquo;s also a
+        <a class="hashish" href="?segmentized">segmentized topology</a>,
+        which distorts the shapes more fluidly than the
+        <a class="hashish" href="?">original</a>.</p>
+
+        <p>Designed and built by <a href="http://stamen.com/studio/shawn">Shawn Allen</a> at
+        <a href="http://stamen.com">Stamen</a>. But
+        <a href="http://d3js.org">d3.js</a> does most of the heavy lifting;
+        colors by <a href="http://colorbrewer2.org">colorbrewer</a>.</p>
+      </div>
+
+      <a href="https://github.com/shawnbot/d3-cartogram/"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub"></a>
+    </div>
+    <script>
+
+      var map = d3.select("#map"),
+          zoom = d3.behavior.zoom()
+            .translate([-38, 32])
+            .scale(.94)
+            .scaleExtent([0.5, 10.0])
+            .on("zoom", updateZoom),
+          layer = map.append("g")
+            .attr("id", "layer"),
+          states = layer.append("g")
+            .attr("id", "states")
+            .selectAll("path");
+
+      // map.call(zoom);
+      updateZoom();
+
+      function updateZoom() {
+        var scale = zoom.scale();
+        layer.attr("transform",
+          "translate(" + zoom.translate() + ") " +
+          "scale(" + [scale, scale] + ")");
+      }
+      
+      var dataById = [{"NAME":"Alabama","values":[{"STATE":1,"NAME":"Alabama","CENSUS2010POP":4779736}]},{"NAME":"Alaska","values":[{"STATE":2,"NAME":"Alaska","CENSUS2010POP":710231}]},{"NAME":"Arizona","values":[{"STATE":4,"NAME":"Arizona","CENSUS2010POP":6392017}]},{"NAME":"Arkansas","values":[{"STATE":5,"NAME":"Arkansas","CENSUS2010POP":2915918}]},{"NAME":"California","values":[{"STATE":6,"NAME":"California","CENSUS2010POP":37253956}]},{"NAME":"Colorado","values":[{"STATE":8,"NAME":"Colorado","CENSUS2010POP":5029196}]},{"NAME":"Connecticut","values":[{"STATE":9,"NAME":"Connecticut","CENSUS2010POP":3574097}]},{"NAME":"Delaware","values":[{"STATE":10,"NAME":"Delaware","CENSUS2010POP":897934}]},{"NAME":"District of Columbia","values":[{"STATE":11,"NAME":"District of Columbia","CENSUS2010POP":601723}]},{"NAME":"Florida","values":[{"STATE":12,"NAME":"Florida","CENSUS2010POP":18801310}]},{"NAME":"Georgia","values":[{"STATE":13,"NAME":"Georgia","CENSUS2010POP":9687653}]},{"NAME":"Hawaii","values":[{"STATE":15,"NAME":"Hawaii","CENSUS2010POP":1360301}]},{"NAME":"Idaho","values":[{"STATE":16,"NAME":"Idaho","CENSUS2010POP":1567582}]},{"NAME":"Illinois","values":[{"STATE":17,"NAME":"Illinois","CENSUS2010POP":12830632}]},{"NAME":"Indiana","values":[{"STATE":18,"NAME":"Indiana","CENSUS2010POP":6483802}]},{"NAME":"Iowa","values":[{"STATE":19,"NAME":"Iowa","CENSUS2010POP":3046355}]},{"NAME":"Kansas","values":[{"STATE":20,"NAME":"Kansas","CENSUS2010POP":2853118}]},{"NAME":"Kentucky","values":[{"STATE":21,"NAME":"Kentucky","CENSUS2010POP":4339367}]},{"NAME":"Louisiana","values":[{"STATE":22,"NAME":"Louisiana","CENSUS2010POP":4533372}]},{"NAME":"Maine","values":[{"STATE":23,"NAME":"Maine","CENSUS2010POP":1328361}]},{"NAME":"Maryland","values":[{"STATE":24,"NAME":"Maryland","CENSUS2010POP":5773552}]},{"NAME":"Massachusetts","values":[{"STATE":25,"NAME":"Massachusetts","CENSUS2010POP":6547629}]},{"NAME":"Michigan","values":[{"STATE":26,"NAME":"Michigan","CENSUS2010POP":9883640}]},{"NAME":"Minnesota","values":[{"STATE":27,"NAME":"Minnesota","CENSUS2010POP":5303925}]},{"NAME":"Mississippi","values":[{"STATE":28,"NAME":"Mississippi","CENSUS2010POP":2967297}]},{"NAME":"Missouri","values":[{"STATE":29,"NAME":"Missouri","CENSUS2010POP":5988927}]},{"NAME":"Montana","values":[{"STATE":30,"NAME":"Montana","CENSUS2010POP":989415}]},{"NAME":"Nebraska","values":[{"STATE":31,"NAME":"Nebraska","CENSUS2010POP":1826341}]},{"NAME":"Nevada","values":[{"STATE":32,"NAME":"Nevada","CENSUS2010POP":2700551}]},{"NAME":"New Hampshire","values":[{"STATE":33,"NAME":"New Hampshire","CENSUS2010POP":1316470}]},{"NAME":"New Jersey","values":[{"STATE":34,"NAME":"New Jersey","CENSUS2010POP":8791894}]},{"NAME":"New Mexico","values":[{"STATE":35,"NAME":"New Mexico","CENSUS2010POP":2059179}]},{"NAME":"New York","values":[{"STATE":36,"NAME":"New York","CENSUS2010POP":19378102}]},{"NAME":"North Carolina","values":[{"STATE":37,"NAME":"North Carolina","CENSUS2010POP":9535483}]},{"NAME":"North Dakota","values":[{"STATE":38,"NAME":"North Dakota","CENSUS2010POP":672591}]},{"NAME":"Ohio","values":[{"STATE":39,"NAME":"Ohio","CENSUS2010POP":11536504}]},{"NAME":"Oklahoma","values":[{"STATE":40,"NAME":"Oklahoma","CENSUS2010POP":3751351}]},{"NAME":"Oregon","values":[{"STATE":41,"NAME":"Oregon","CENSUS2010POP":3831074}]},{"NAME":"Pennsylvania","values":[{"STATE":42,"NAME":"Pennsylvania","CENSUS2010POP":12702379}]},{"NAME":"Puerto Rico Commonwealth","values":[{"STATE":72,"NAME":"Puerto Rico Commonwealth","CENSUS2010POP":3725789}]},{"NAME":"Rhode Island","values":[{"STATE":44,"NAME":"Rhode Island","CENSUS2010POP":1052567}]},{"NAME":"South Carolina","values":[{"STATE":45,"NAME":"South Carolina","CENSUS2010POP":4625364}]},{"NAME":"South Dakota","values":[{"STATE":46,"NAME":"South Dakota","CENSUS2010POP":814180}]},{"NAME":"Tennessee","values":[{"STATE":47,"NAME":"Tennessee","CENSUS2010POP":6346105}]},{"NAME":"Texas","values":[{"STATE":48,"NAME":"Texas","CENSUS2010POP":25145561}]},{"NAME":"Utah","values":[{"STATE":49,"NAME":"Utah","CENSUS2010POP":2763885}]},{"NAME":"Vermont","values":[{"STATE":50,"NAME":"Vermont","CENSUS2010POP":625741}]},{"NAME":"Virginia","values":[{"STATE":51,"NAME":"Virginia","CENSUS2010POP":8001024}]},{"NAME":"Washington","values":[{"STATE":53,"NAME":"Washington","CENSUS2010POP":6724540}]},{"NAME":"West Virginia","values":[{"STATE":54,"NAME":"West Virginia","CENSUS2010POP":1852994}]},{"NAME":"Wisconsin","values":[{"STATE":55,"NAME":"Wisconsin","CENSUS2010POP":5686986}]},{"NAME":"Wyoming","values":[{"STATE":56,"NAME":"Wyoming","CENSUS2010POP":563626}]}];
+
+      var proj = d3.geo.albersUsa(),
+          topology,
+          geometries;
+          
+    var scale = d3.scale.linear();
+    scale.domain(d3.extent(dataById,function(d){return +d.values[0].CENSUS2010POP}));
+    scale.range([1,1000]);
+    
+    var carto = d3.cartogram()
+      .projection(proj)
+      .properties(function(d) {
+        // little different here in that
+        // use filter since dplyr/jsonlite gives different dataById format
+        //  and we will get .values
+        return dataById.filter(
+            function(dd){
+              return dd.NAME == d.id;
+            }
+          )[0].values[0];
+      })
+      .value(function(d) {
+        console.log(scale(+d.properties.CENSUS2010POP));
+        return scale(+d.properties.CENSUS2010POP)
+      });
+      
+      d3.json("./data/us-states.topojson", function(topo) {
+        topology = topo;
+        geometries = topology.objects.states;
+        
+        init();
+      });
+
+      function init() {
+        var features = carto(topology, geometries).features,
+            path = d3.geo.path()
+              .projection(proj);
+
+        states = states.data(features)
+          .enter()
+          .append("path")
+            .attr("class", "state")
+            .attr("id", function(d) {
+              return d.properties.NAME;
+            })
+            .attr("fill", "#fafafa")
+            .attr("d", carto.path);
+
+        states.append("title");
+      }
+
+    </script>
+  </body>
+</html>
