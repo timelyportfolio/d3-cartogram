@@ -76,6 +76,19 @@ var features = carto(topo, topo.objects.states).features;
 '
 )
 
+# if we want get coordinates to plot with R
+features <- ctx$get("features")
+# lazy and sloppy, but plot a couple polygons to demo
+plot(x=0:1,xlim=c(0,1000),ylim=c(-700,0),type="n")
+lapply(
+  features$geometry$coordinates
+  ,function(poly){
+    # be lazy and just do the arrays
+    #  skip the recursion
+    if(inherits(poly,"array")) polygon(x=poly[,,1],y=-poly[,,2])
+  }
+)
+
 # get the path attributes of transformed for svg
 paths <- ctx$get(
   "features.map(function(ftr){return carto.path(ftr)})"
