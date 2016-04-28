@@ -44,7 +44,7 @@ fs.readFile(input, {encoding: 'utf8'}, function(error, input) {
   if (error) {
     throw new Error(error);
   }
-
+debugger;
   var topology = JSON.parse(input);
   var object = options.object || Object.keys(topology.objects)[0];
   var geometries = topology.objects[object].geometries;
